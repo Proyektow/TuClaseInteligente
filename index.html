@@ -1,1 +1,433 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TuClaseInteligente | Recursos Educativos, PDI y Plantillas de Aula</title>
+  <meta name="description" content="Portal educativo abierto con microherramientas para pizarra digital, ruleta de alumnos, fichas PDF y trucos de Google Drive para docentes.">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Canvas Confetti para la ruleta -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- NOTIFICACIÓN TOAST FLOTANTE -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 hidden items-center gap-2.5 px-4 py-3 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xl text-sm font-semibold transition-all duration-300">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 dark:text-emerald-600"></i>
+    <span id="toastMsg">Copiado al portapapeles</span>
+  </div>
+
+  <!-- CABECERA / NAVEGACIÓN -->
+  <header id="mainHeader" class="sticky top-0 z-40 border-b border-slate-200/80 dark:border-slate-800 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- Logo en una sola línea -->
+      <a href="#" class="flex items-center gap-2 font-extrabold text-xl tracking-tight">
+        <span class="p-1.5 rounded-lg bg-brand-600 text-white shadow-sm">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+        </span>
+        <span class="whitespace-nowrap">TuClaseInteligente<span class="text-brand-600">.</span></span>
+      </a>
+
+      <!-- Enlaces de navegación -->
+      <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+        <a href="#recursos" class="hover:text-brand-600 transition flex items-center gap-1.5">
+          <i data-lucide="folder-open" class="w-4 h-4"></i> Recursos
+        </a>
+        <a href="#herramientas" class="hover:text-brand-600 transition flex items-center gap-1.5">
+          <i data-lucide="wrench" class="w-4 h-4"></i> Herramientas PDI
+        </a>
+        <a href="#academia" class="hover:text-brand-600 transition flex items-center gap-1.5">
+          <i data-lucide="zap" class="w-4 h-4"></i> Academia Exprés
+        </a>
+        <a href="#metodologia" class="hover:text-brand-600 transition">Metodología</a>
+      </nav>
+
+      <!-- Acciones rápidas -->
+      <div class="flex items-center gap-2">
+        <button id="projectorBtn" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 transition" title="Modo Proyector para Pizarra Digital">
+          <i data-lucide="monitor" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Modo Proyector</span>
+        </button>
+
+        <button id="themeToggle" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition" aria-label="Cambiar tema">
+          <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+          <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+        </button>
+
+        <a href="https://drive.google.com" target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition">
+          <i data-lucide="hard-drive" class="w-4 h-4"></i>
+          <span>Drive Abierto</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- BOTÓN SALIR DE MODO PROYECTOR (Oculto por defecto) -->
+  <button id="exitProjectorBtn" class="fixed top-4 right-4 z-50 hidden items-center gap-2 px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold shadow-lg hover:bg-rose-700 transition">
+    <i data-lucide="minimize-2" class="w-4 h-4"></i> Salir Modo Proyector (Esc)
+  </button>
+
+  <!-- SECCIÓN 1: HERO & BUSCADOR OMNIBOX -->
+  <section id="heroSection" class="relative overflow-hidden py-16 lg:py-24">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-50 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800 mb-6">
+        <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+        Ecosistema Educativo Abierto
+      </span>
+      <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
+        Herramientas, gamificación y recursos para una <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-indigo-500">enseñanza sin fricción</span>
+      </h1>
+      <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto mb-8">
+        Descarga fichas listas para usar, duplica plantillas de Google Drive o proyecta las herramientas interactivas directamente en la pizarra del aula.
+      </p>
+
+      <!-- Buscador Global Omnibox -->
+      <div class="relative max-w-2xl mx-auto mb-6">
+        <i data-lucide="search" class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Escribe lo que necesitas (ej. fracciones, notas, drive, escape room)..." 
+          class="w-full pl-12 pr-20 py-4 rounded-2xl text-sm sm:text-base bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 shadow-lg focus:outline-none focus:border-brand-500 transition"
+        >
+        <kbd class="hidden sm:inline-block absolute right-4 top-1/2 -translate-y-1/2 px-2 py-1 text-xs font-semibold text-slate-400 bg-slate-100 dark:bg-slate-700 rounded-md border border-slate-200 dark:border-slate-600">
+          Ctrl + K
+        </kbd>
+      </div>
+
+      <!-- Chips de acceso rápido -->
+      <div class="flex flex-wrap items-center justify-center gap-2 text-xs">
+        <span class="text-slate-400 font-medium mr-1">Accesos rápidos:</span>
+        <button data-quick-filter="pdf" class="quick-chip px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 transition">📄 Descargar PDFs</button>
+        <button data-quick-filter="drive" class="quick-chip px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 transition">📊 Plantillas Drive</button>
+        <a href="#herramientas" class="px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 transition">🎯 Ruleta y Reloj PDI</a>
+        <a href="#academia" class="px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 transition">⚡ Trucos TikTok</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 2: BANCO DE RECURSOS (HUB DE CARPETAS Y FILTROS) -->
+  <section id="recursos" class="py-16 bg-white dark:bg-slate-800/40 border-y border-slate-200/80 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-brand-600">📁 01. Biblioteca Digital</span>
+          <h2 class="text-3xl font-bold tracking-tight mt-1">Banco de Recursos y Descargas</h2>
+        </div>
+        <!-- Filtro secundario por formato -->
+        <div class="flex items-center gap-2 flex-wrap">
+          <select id="formatFilter" class="px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none">
+            <option value="all">Todos los formatos</option>
+            <option value="pdf">📄 Solo PDF Imprimible</option>
+            <option value="drive">📊 Solo Plantillas Drive</option>
+            <option value="interactivo">🎮 Solo 100% Interactivo</option>
+          </select>
+          <button id="favFilterBtn" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 hover:bg-amber-100 transition flex items-center gap-1.5">
+            <i data-lucide="bookmark" class="w-3.5 h-3.5"></i>
+            <span>Mis Guardados (<span id="favCount">0</span>)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Carpetas / Ramas principales -->
+      <div class="flex flex-wrap items-center gap-2 mb-8" id="categoryButtons">
+        <button class="cat-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-brand-600 text-white transition flex items-center gap-1.5" data-cat="all">
+          <i data-lucide="layers" class="w-4 h-4"></i> Todas las Carpetas
+        </button>
+        <button class="cat-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center gap-1.5" data-cat="matematicas">
+          <i data-lucide="calculator" class="w-4 h-4"></i> Matemáticas & Lógica
+        </button>
+        <button class="cat-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center gap-1.5" data-cat="competencia-digital">
+          <i data-lucide="cloud" class="w-4 h-4"></i> Competencia Digital
+        </button>
+        <button class="cat-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center gap-1.5" data-cat="organizacion">
+          <i data-lucide="clipboard-list" class="w-4 h-4"></i> Organización de Aula
+        </button>
+        <button class="cat-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center gap-1.5" data-cat="gamificacion-retos">
+          <i data-lucide="gamepad-2" class="w-4 h-4"></i> Gamificación & Escape Rooms
+        </button>
+      </div>
+
+      <!-- Grid Dinámico de Recursos -->
+      <div id="resourceGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+      <!-- Estado vacío -->
+      <div id="noResults" class="hidden text-center py-12">
+        <i data-lucide="folder-search" class="w-12 h-12 mx-auto text-slate-400 mb-3"></i>
+        <p class="text-slate-500 font-medium">No hay recursos que coincidan con tu filtro.</p>
+        <button id="resetFiltersBtn" class="mt-3 text-xs font-semibold text-brand-600 hover:underline">Limpiar todos los filtros</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECCIÓN 3: MICROHERRAMIENTAS DE AULA ACTIVA (PDI) -->
+  <section id="herramientas" class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mb-10">
+        <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">🎮 02. Zona Interactiva PDI</span>
+        <h2 class="text-3xl font-bold tracking-tight mt-1">Herramientas Directas de Aula</h2>
+        <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">Tus listas de alumnos y notas se guardan automáticamente en este navegador.</p>
+      </div>
+
+      <!-- Banco de Alumnos Compartido -->
+      <div class="mb-8 p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <label for="studentsInput" class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <i data-lucide="users" class="w-4 h-4 text-brand-600"></i> Lista de Alumnos de tu Clase (Separados por coma)
+          </label>
+          <span class="text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+            <i data-lucide="save" class="w-3.5 h-3.5"></i> Guardado automático
+          </span>
+        </div>
+        <textarea id="studentsInput" rows="2" class="w-full p-3 rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-brand-500">Alex, Carla, Diego, Elena, Mateo, Sara, Hugo, Lucía, Leo, Martina, Daniel, Sofía</textarea>
+      </div>
+
+      <!-- Grid de 6 Microherramientas -->
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- 1. Ruleta / Selector Aleatorio -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">Azar</span>
+              <i data-lucide="dices" class="w-5 h-5 text-indigo-500"></i>
+            </div>
+            <h3 class="text-lg font-bold mb-1">Selector Aleatorio</h3>
+            <p class="text-xs text-slate-500 mb-4">Saca a un alumno al azar con animación y confeti.</p>
+            <div id="rouletteDisplay" class="h-24 rounded-xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-2xl font-extrabold text-brand-600 dark:text-brand-400 border border-slate-200 dark:border-slate-700 mb-4 px-2 text-center">
+              ¿Quién sale?
+            </div>
+          </div>
+          <button id="spinBtn" class="w-full py-3 rounded-xl font-bold text-sm text-white bg-indigo-600 hover:bg-indigo-700 transition">
+            Girar Ruleta
+          </button>
+        </div>
+
+        <!-- 2. Temporizador Visual de Retos -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">Gestión de Tiempo</span>
+              <i data-lucide="timer" class="w-5 h-5 text-rose-500"></i>
+            </div>
+            <h3 class="text-lg font-bold mb-1">Temporizador de Retos</h3>
+            <div class="flex gap-1.5 my-3">
+              <button data-time="120" class="timer-preset flex-1 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-700 hover:bg-brand-600 hover:text-white transition">2m</button>
+              <button data-time="300" class="timer-preset flex-1 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-700 hover:bg-brand-600 hover:text-white transition">5m</button>
+              <button data-time="600" class="timer-preset flex-1 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-700 hover:bg-brand-600 hover:text-white transition">10m</button>
+              <button data-time="900" class="timer-preset flex-1 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-700 hover:bg-brand-600 hover:text-white transition">15m</button>
+            </div>
+            <div id="timerDisplay" class="h-20 rounded-xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-4xl font-mono font-extrabold tracking-wider border border-slate-200 dark:border-slate-700 mb-4">
+              05:00
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button id="timerStartBtn" class="flex-1 py-3 rounded-xl font-bold text-sm text-white bg-emerald-600 hover:bg-emerald-700 transition">Iniciar / Pausa</button>
+            <button id="timerResetBtn" class="px-4 py-3 rounded-xl font-bold text-sm bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 transition">Reset</button>
+          </div>
+        </div>
+
+        <!-- 3. Generador de Equipos -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">Cooperativo</span>
+              <i data-lucide="users-round" class="w-5 h-5 text-emerald-500"></i>
+            </div>
+            <h3 class="text-lg font-bold mb-2">Creador de Equipos</h3>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs text-slate-500">Alumnos por grupo:</span>
+              <select id="teamSizeSelect" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-700">
+                <option value="2">Parejas (2)</option>
+                <option value="3" selected>Tríos (3)</option>
+                <option value="4">Equipos de 4</option>
+                <option value="5">Equipos de 5</option>
+              </select>
+            </div>
+            <div id="teamsOutput" class="h-28 overflow-y-auto rounded-xl bg-slate-100 dark:bg-slate-900 p-2.5 text-xs space-y-1.5 border border-slate-200 dark:border-slate-700 mb-4">
+              <p class="text-slate-400 text-center mt-8">Pulsa para agrupar la lista superior</p>
+            </div>
+          </div>
+          <button id="generateTeamsBtn" class="w-full py-3 rounded-xl font-bold text-sm text-white bg-emerald-600 hover:bg-emerald-700 transition">
+            Generar Equipos
+          </button>
+        </div>
+
+        <!-- 4. Semáforo de Nivel de Voz -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300">Clima de Aula</span>
+              <i data-lucide="volume-2" class="w-5 h-5 text-amber-500"></i>
+            </div>
+            <h3 class="text-lg font-bold mb-1">Semáforo de Ruido</h3>
+            <p class="text-xs text-slate-500 mb-4">Indica visualmente el volumen permitido en clase.</p>
+            <div id="noiseStatusBox" class="h-24 rounded-xl bg-emerald-500/15 border-2 border-emerald-500 flex flex-col items-center justify-center p-2 mb-4 transition-all">
+              <span id="noiseTitle" class="text-base font-extrabold text-emerald-600 dark:text-emerald-400">🟢 Trabajo en Grupo</span>
+              <span id="noiseDesc" class="text-xs text-slate-500">Debate y colaboración permitida</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <button data-level="red" class="noise-btn py-2.5 rounded-xl text-xs font-bold bg-rose-600 text-white">🔴 Silencio</button>
+            <button data-level="amber" class="noise-btn py-2.5 rounded-xl text-xs font-bold bg-amber-500 text-white">🟡 Susurro</button>
+            <button data-level="green" class="noise-btn py-2.5 rounded-xl text-xs font-bold bg-emerald-600 text-white">🟢 Equipo</button>
+          </div>
+        </div>
+
+        <!-- 5. Lanzador de Dados Virtual -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300">Matemáticas / Juegos</span>
+              <i data-lucide="box" class="w-5 h-5 text-purple-500"></i>
+            </div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-lg font-bold">Dados Virtuales</h3>
+              <select id="diceCountSelect" class="px-2 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-700">
+                <option value="1">1 Dado</option>
+                <option value="2" selected>2 Dados</option>
+                <option value="3">3 Dados</option>
+              </select>
+            </div>
+            <div id="diceContainer" class="h-24 rounded-xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center gap-4 border border-slate-200 dark:border-slate-700 mb-4">
+              <span class="text-3xl font-extrabold">🎲 6</span>
+              <span class="text-3xl font-extrabold">🎲 6</span>
+            </div>
+          </div>
+          <button id="rollDiceBtn" class="w-full py-3 rounded-xl font-bold text-sm text-white bg-purple-600 hover:bg-purple-700 transition">
+            Lanzar Dados (Suma: <span id="diceSum">12</span>)
+          </button>
+        </div>
+
+        <!-- 6. Tarjetas de Preguntas / Debate -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">Oratoria y Lógica</span>
+              <i data-lucide="message-square-quote" class="w-5 h-5 text-blue-500"></i>
+            </div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-lg font-bold">Reto o Pregunta</h3>
+              <select id="promptCategory" class="px-2 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-700">
+                <option value="inicio">Rompehielos</option>
+                <option value="logica">Cálculo / Lógica</option>
+                <option value="cierre">Metacognición</option>
+              </select>
+            </div>
+            <div id="promptDisplay" class="h-24 rounded-xl bg-slate-100 dark:bg-slate-900 p-3 flex items-center justify-center text-center text-xs sm:text-sm font-semibold border border-slate-200 dark:border-slate-700 mb-4">
+              Pulsa el botón para proyectar una pregunta para la clase.
+            </div>
+          </div>
+          <button id="nextPromptBtn" class="w-full py-3 rounded-xl font-bold text-sm text-white bg-brand-600 hover:bg-brand-700 transition">
+            Sacar Nueva Tarjeta
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Pizarra Rápida de Avisos del Día -->
+      <div class="mt-6 p-5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/60">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+            <i data-lucide="pin" class="w-4 h-4"></i> Pizarra Rápida de Avisos / Tareas del Día
+          </span>
+          <button id="clearNotesBtn" class="text-xs text-amber-700 dark:text-amber-400 hover:underline">Limpiar nota</button>
+        </div>
+        <textarea id="quickNotes" rows="2" placeholder="Escribe aquí las tareas o el orden del día para proyectar en clase..." class="w-full p-3 rounded-xl text-sm font-medium bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800 focus:outline-none"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 4: ACADEMIA EXPRÉS (TRUCOS TIKTOK & PRODUCTIVIDAD) -->
+  <section id="academia" class="py-16 bg-white dark:bg-slate-800/40 border-y border-slate-200/80 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mb-10">
+        <span class="text-xs font-bold uppercase tracking-wider text-amber-600">⚡ 03. Micro-Tutoriales</span>
+        <h2 class="text-3xl font-bold tracking-tight mt-1">Academia Exprés: Trucos en 15 Segundos</h2>
+        <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">Copia comandos y trucos rápidos de Google Drive y productividad explicados en TikTok.</p>
+      </div>
+
+      <div id="hacksGrid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5"></div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 5: METODOLOGÍA Y CONTACTO -->
+  <section id="metodologia" class="py-16">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <span class="text-xs font-bold uppercase tracking-wider text-brand-600">💡 04. El Proyecto</span>
+        <h2 class="text-3xl font-bold tracking-tight mt-1 mb-3">Filosofía de TuClaseInteligente</h2>
+        <p class="text-sm text-slate-600 dark:text-slate-400">Tecnología educativa práctica pensada para ahorrar tiempo al docente y motivar al alumnado.</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+          <i data-lucide="sparkles" class="w-6 h-6 text-brand-600 mb-3"></i>
+          <h3 class="font-bold mb-1">Cero Fricción</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Sin registros ni anuncios. Entras, proyectas o descargas el recurso en dos clics.</p>
+        </div>
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+          <i data-lucide="gamepad-2" class="w-6 h-6 text-brand-600 mb-3"></i>
+          <h3 class="font-bold mb-1">Gamificación con Sentido</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Retos conectados directamente con el currículo de primaria y competencias digitales.</p>
+        </div>
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+          <i data-lucide="share-2" class="w-6 h-6 text-brand-600 mb-3"></i>
+          <h3 class="font-bold mb-1">Cultura Abierta</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Plantillas listas para duplicar en tu propio Google Drive y adaptar a tu grupo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-200 dark:border-slate-800 py-10 bg-white dark:bg-slate-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2 font-extrabold text-lg">
+        <span class="p-1 rounded-lg bg-brand-600 text-white"><i data-lucide="sparkles" class="w-4 h-4"></i></span>
+        <span>TuClaseInteligente<span class="text-brand-600">.</span></span>
+      </div>
+      <p class="text-xs text-slate-500">© <span id="year"></span> TuClaseInteligente · Recursos Educativos Abiertos</p>
+      <div class="flex items-center gap-4 text-slate-500">
+        <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" class="hover:text-brand-600 transition text-xs font-semibold flex items-center gap-1">
+          <i data-lucide="video" class="w-4 h-4"></i> TikTok
+        </a>
+        <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="hover:text-brand-600 transition text-xs font-semibold flex items-center gap-1">
+          <i data-lucide="github" class="w-4 h-4"></i> GitHub
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS SEPARADOS -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
