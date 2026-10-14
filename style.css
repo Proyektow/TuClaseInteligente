@@ -1,1 +1,42 @@
+/* styles.css - Estilos personalizados de TuClaseInteligente */
 
+.glass-card {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dark .glass-card {
+  background: rgba(30, 41, 59, 0.85);
+}
+
+/* Modo Proyector: oculta distracciones para la pizarra del aula */
+body.projector-mode #mainHeader,
+body.projector-mode #heroSection,
+body.projector-mode #metodologia,
+body.projector-mode footer {
+  display: none !important;
+}
+
+body.projector-mode #exitProjectorBtn {
+  display: inline-flex !important;
+}
+
+body.projector-mode #herramientas {
+  padding-top: 2rem;
+}
+
+/* Scrollbar limpia para las cajas internas */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
